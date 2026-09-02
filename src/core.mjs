@@ -158,6 +158,24 @@ function event({ uid, date, stamp, summary, description }) {
   return ['BEGIN:VEVENT', `UID:${icsText(uid)}@permitkeep.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${icsDate(date)}`, `SUMMARY:${icsText(summary)}`, `DESCRIPTION:${icsText(description)}`, 'TRANSP:TRANSPARENT', 'END:VEVENT'];
 }
 
+function foldIcsLine(line) {
+  const encoder = new TextEncoder();
+  const folded = [];
+  let chunk = '';
+  let limit = 75;
+  for (const character of line) {
+    if (encoder.encode(chunk + character).length > limit) {
+      folded.push(`${folded.length ? ' ' : ''}${chunk}`);
+      chunk = character;
+      limit = 74;
+    } else {
+      chunk += character;
+    }
+  }
+  folded.push(`${folded.length ? ' ' : ''}${chunk}`);
+  return folded;
+}
+
 export function buildCalendar(records, generatedAt = new Date().toISOString()) {
   const stamp = new Date(generatedAt).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//PermitKeep//Renewal Calendar//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:PermitKeep deadlines'];
@@ -168,5 +186,5 @@ export function buildCalendar(records, generatedAt = new Date().toISOString()) {
     lines.push(...event({ uid: `${record.id}-expire`, date: record.expirationDate, stamp, summary: `Expires — ${record.name}`, description: detail }));
   }
   lines.push('END:VCALENDAR');
-  return `${lines.join('\r\n')}\r\n`;
+  return `${lines.flatMap(foldIcsLine).join('\r\n')}\r\n`;
 }

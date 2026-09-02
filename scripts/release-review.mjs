@@ -36,7 +36,8 @@ const missingAssets = cacheAssets.filter((asset) => {
 });
 check(cacheAssets.length >= 12 && !missingAssets.length, 'offline asset manifest', missingAssets.length ? `Missing: ${missingAssets.join(', ')}` : `${cacheAssets.length} declared cache assets exist.`);
 check(runtime['sw.js'].includes("event.request.method !== 'GET'") && runtime['sw.js'].includes('origin !== self.location.origin'), 'service-worker request boundary', 'Only same-origin GET requests enter cache handling.');
-check(runtime['sw.js'].includes('keys.filter((key) => key !== CACHE)') && runtime['sw.js'].includes('self.clients.claim()'), 'service-worker upgrade cleanup', 'Old named caches are removed and upgraded workers claim clients.');
+check(runtime['sw.js'].includes('key !== CACHE') && runtime['sw.js'].includes('self.clients.claim()'), 'service-worker upgrade cleanup', 'Old named caches are removed and upgraded workers claim clients.');
+check(runtime['sw.js'].includes("key.startsWith('permitkeep-')"), 'service-worker cache namespace', 'Activation can delete only obsolete PermitKeep caches, not sibling application caches on the shared origin.');
 
 const manifestIconsMissing = (manifest.icons ?? []).filter((icon) => !fs.existsSync(path.join(root, icon.src))).map((icon) => icon.src);
 check(manifest.start_url === './' && manifest.scope === './' && !manifestIconsMissing.length, 'install manifest paths', manifestIconsMissing.length ? `Missing: ${manifestIconsMissing.join(', ')}` : 'Relative start/scope and icon paths are present.');
@@ -45,6 +46,8 @@ check(runtime['src/core.mjs'].includes('duplicate record identifier') && runtime
 check(runtime['src/core.mjs'].includes('/^[=+\\-@]/') && runtime['src/core.mjs'].includes("replaceAll('\\n', '\\\\n')"), 'export injection controls', 'CSV formula prefixes and calendar text/newlines are neutralized.');
 check(runtime['src/app.mjs'].includes('const escapeHtml') && runtime['src/app.mjs'].includes('rel="noopener noreferrer"'), 'render and opener controls', 'User text is escaped before template rendering and new tabs block opener access.');
 check(runtime['privacy.html'].includes('Local storage is not a secure vault') && runtime['privacy.html'].includes('does not determine required permits') && runtime['privacy.html'].includes('no analytics'), 'privacy and operational disclosure', 'Storage, tracking, and compliance boundaries are stated.');
+check(runtime['src/app.mjs'].includes('storageRecovery') && runtime['src/app.mjs'].includes('Download damaged data') && runtime['src/app.mjs'].includes('Reset local data'), 'corrupt-storage recovery gate', 'Unreadable local data blocks normal writes and offers raw download plus explicit reset.');
+check(!runtime['styles.css'].includes('rgba(47,143,104,.3)') && runtime['styles.css'].includes('input::placeholder, textarea::placeholder { color: var(--muted); }'), 'focus and placeholder contrast', 'Focus indicators are opaque and placeholder text uses the verified muted-text color.');
 check(runtimeNames.every((name) => runtime[name].split(/\r?\n/).length < 400), 'maintainable module size', 'Every runtime source file remains below 400 lines.');
 
 const failed = results.filter((result) => !result.passed);

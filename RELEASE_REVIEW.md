@@ -20,6 +20,11 @@ Scope: static application, backup/restore, offline lifecycle, accessibility, pri
 6. Meta CSPs claimed `frame-ancestors`, which browsers ignore in meta delivery. The ineffective claim was removed; host-header enforcement remains explicit residual risk.
 7. Filter state, record action names, required marks, skip navigation, and error announcements lacked complete assistive semantics. ARIA pressed states, record-specific names, a focusable main target, hidden decorative marks, and alert role changes were added.
 8. Programmatic downloads now attach the temporary anchor for broader browser compatibility.
+9. An independent review found that service-worker cleanup was origin-wide. Cleanup is now restricted to obsolete `permitkeep-*` caches, and upgrade QA proves a sibling cache survives.
+10. Unreadable local storage previously fell back to an empty writable ledger. The app now enters a blocking recovery screen that preserves the raw value, offers a download, and requires explicit confirmation before reset.
+11. Record edits now refresh `updatedAt` while preserving `createdAt`.
+12. Calendar output now folds physical lines at 75 UTF-8 octets for broad iCalendar compatibility.
+13. Placeholder text and keyboard focus indicators now meet the applicable contrast targets.
 
 ## Manual source review
 
@@ -34,8 +39,11 @@ Scope: static application, backup/restore, offline lifecycle, accessibility, pri
 
 - `localStorage` is not encrypted and remains exposed to anyone controlling the unlocked browser profile; the UI and privacy notice prohibit secrets and require user backups.
 - Static meta CSP cannot provide `frame-ancestors`; any public host claiming anti-framing protection must prove a response-header policy by readback.
-- A fresh independent human or separate-model review was not available in this cron runtime. The deterministic static reviewer is separate from runtime tests but is not a substitute for specialist review.
 - Broader trademark/confusing-similarity clearance, jurisdiction-specific legal review, deployment headers, licensing/pricing, checkout, and fulfillment remain open.
+
+## Independent review disposition
+
+A separate-model review initially failed the gate with two high-severity and three medium-severity findings. All five were reproduced and corrected. Fourteen unit tests, 25 deterministic release controls, and the expanded browser suite now pass, including corrupt-storage write protection, sibling-cache preservation, UTF-8 calendar folding, timestamp refresh, and contrast checks. The independent-review gate is closed; payment and commercial terms remain separate release gates.
 
 ## Public deployment readback
 

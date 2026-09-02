@@ -1,5 +1,5 @@
 import { buildCalendar, classifyDeadline, recordsToCsv, renewalDate, sortByUrgency } from './core.mjs';
-import { exportBackup, importBackup, loadRecords, removeRecord, saveRecords, upsertRecord } from './store.mjs';
+import { exportBackup, importBackup, loadRecords, removeRecord, saveRecords, STORAGE_KEY, upsertRecord } from './store.mjs';
 
 const app = document.querySelector('#app');
 const toast = document.querySelector('#toast');
@@ -7,6 +7,7 @@ let records = [];
 let editingId = null;
 let filter = 'all';
 let query = '';
+let storageRecovery = null;
 
 const today = () => {
   const date = new Date();
@@ -106,6 +107,19 @@ function formTemplate() {
 }
 
 function render() {
+  if (storageRecovery) {
+    app.innerHTML = `<header class="site-header"><a class="brand" href="./" aria-label="PermitKeep home"><span class="brand-mark" aria-hidden="true">PK</span><span>PermitKeep<small>Local data recovery</small></span></a></header><main id="top" tabindex="-1"><section class="panel recovery-panel" aria-labelledby="recovery-title"><p class="eyebrow">Write protection active</p><h1 id="recovery-title">Your local records could not be opened.</h1><p>PermitKeep has not changed the unreadable browser data. Download the damaged data for recovery or support, then reset only when you are ready to start empty or restore a known-good backup.</p><div class="boundary"><strong>Do not reset before preserving what you may need.</strong><p>${escapeHtml(storageRecovery.message)}</p></div><div class="recovery-actions"><button class="button button-primary" id="download-damaged-data" type="button">Download damaged data</button><button class="button button-danger" id="reset-local-data" type="button">Reset local data</button></div></section></main>`;
+    document.querySelector('#download-damaged-data').addEventListener('click', () => download(`permitkeep-damaged-data-${today()}.txt`, storageRecovery.raw, 'text/plain;charset=utf-8'));
+    document.querySelector('#reset-local-data').addEventListener('click', () => {
+      if (!confirm('Reset the unreadable local data? Download it first if you may need recovery. This cannot be undone.')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      storageRecovery = null;
+      records = [];
+      render();
+      announce('Local data reset. You can now restore a backup or start a new ledger.');
+    });
+    return;
+  }
   const counts = summary();
   const visible = sortByUrgency(records, today()).filter(matches);
   app.innerHTML = `<header class="site-header"><a class="brand" href="#top" aria-label="PermitKeep home"><span class="brand-mark" aria-hidden="true">PK</span><span>PermitKeep<small>Renewals without the spreadsheet scramble</small></span></a><nav><a href="#deadlines">Deadlines</a><a href="./permit-renewal-tracking-checklist.html">Checklist</a><a href="./privacy.html">Privacy</a></nav></header>
@@ -171,6 +185,6 @@ function bind() {
   });
 }
 
-try { records = loadRecords(); } catch (error) { records = []; setTimeout(() => announce(error.message, 'error')); }
+try { records = loadRecords(); } catch (error) { records = []; storageRecovery = { message: error.message, raw: localStorage.getItem(STORAGE_KEY) ?? '' }; }
 render();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(() => {});

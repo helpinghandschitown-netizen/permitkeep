@@ -116,6 +116,14 @@ try {
   })`);
   if (baseline.externalOrigins.length || baseline.missingLabels || baseline.emptyActions || baseline.horizontalOverflow || baseline.skipTarget !== '#top' || baseline.skipTargetFocusable !== '-1' || baseline.requiredMarksExposed || baseline.filtersMissingPressedState) throw new Error(`Desktop accessibility baseline failed: ${JSON.stringify(baseline)}`);
 
+  await evaluate(`localStorage.setItem('permitkeep.records.v1', '{broken')`);
+  await send('Page.reload', { ignoreCache: true }, sessionId);
+  await waitFor(`document.querySelector('.recovery-panel')`, 'corrupt-storage recovery screen');
+  const corruptRecovery = await evaluate(`({ raw: localStorage.getItem('permitkeep.records.v1'), formPresent: Boolean(document.querySelector('#record-form')), downloadPresent: Boolean(document.querySelector('#download-damaged-data')), resetPresent: Boolean(document.querySelector('#reset-local-data')) })`);
+  if (corruptRecovery.raw !== '{broken' || corruptRecovery.formPresent || !corruptRecovery.downloadPresent || !corruptRecovery.resetPresent) throw new Error(`Corrupt-storage write gate failed: ${JSON.stringify(corruptRecovery)}`);
+  await evaluate(`window.confirm = () => true; document.querySelector('#reset-local-data').click()`);
+  await waitFor(`document.querySelector('#record-form') && !localStorage.getItem('permitkeep.records.v1')`, 'explicit corrupt-storage reset');
+
   await send('Page.navigate', { url: `http://127.0.0.1:${appPort}/privacy.html` }, sessionId);
   await waitFor(`document.querySelector('h1')?.textContent.includes('deadline ledger')`, 'privacy notice');
   const privacyPage = await evaluate(`({
@@ -243,6 +251,7 @@ try {
   fs.writeFileSync('.qa/permitkeep-mobile.png', Buffer.from(mobileShot.data, 'base64'));
 
   await waitFor(`navigator.serviceWorker?.controller && caches.keys().then((keys) => keys.includes('${baseCache}'))`, 'initial service worker activation');
+  await evaluate(`caches.open('sibling-app-v1').then((cache) => cache.put('./sibling-probe', new Response('keep me')))`);
   await stopServer();
   await send('Page.reload', { ignoreCache: true }, sessionId);
   await waitFor(`document.querySelector('.record-card')`, 'offline refresh');
@@ -262,12 +271,12 @@ try {
   await send('Page.reload', { ignoreCache: true }, sessionId);
   await waitFor(`document.querySelector('meta[name="release-qa"]')?.content === 'v2' && document.querySelectorAll('.record-card').length === 2`, 'upgraded offline shell');
   const upgrade = await evaluate(`(async () => ({ marker: document.querySelector('meta[name="release-qa"]')?.content, records: JSON.parse(localStorage.getItem('permitkeep.records.v1')).length, cards: document.querySelectorAll('.record-card').length, cacheKeys: await caches.keys() }))()`);
-  if (upgrade.marker !== 'v2' || upgrade.records !== 2 || upgrade.cards !== 2 || upgrade.cacheKeys.join(',') !== nextCache) throw new Error(`Offline upgrade failed: ${JSON.stringify(upgrade)}`);
+  if (upgrade.marker !== 'v2' || upgrade.records !== 2 || upgrade.cards !== 2 || !upgrade.cacheKeys.includes(nextCache) || !upgrade.cacheKeys.includes('sibling-app-v1') || upgrade.cacheKeys.includes(baseCache)) throw new Error(`Offline upgrade failed: ${JSON.stringify(upgrade)}`);
 
   if (externalNetworkOrigins.size) throw new Error(`Unexpected external network origins: ${[...externalNetworkOrigins].join(', ')}`);
   if (consoleErrors.length) throw new Error(`Browser exceptions: ${consoleErrors.join('; ')}`);
 
-  console.log(JSON.stringify({ passed: true, baseline, privacyPage, guidePages, flow, backupRestore: { malformed, restored, cancelled, downloadedRecords: downloadedBackup.records.length }, quotaFailure, accessibility: { ...accessibility, unnamedAxNodes }, reducedMotion, mobile, offline, upgrade, externalNetworkOrigins: [...externalNetworkOrigins], securityMessages, consoleErrors, artifacts: ['.qa/permitkeep-desktop.png', '.qa/permitkeep-mobile.png'] }, null, 2));
+  console.log(JSON.stringify({ passed: true, baseline, corruptRecovery, privacyPage, guidePages, flow, backupRestore: { malformed, restored, cancelled, downloadedRecords: downloadedBackup.records.length }, quotaFailure, accessibility: { ...accessibility, unnamedAxNodes }, reducedMotion, mobile, offline, upgrade, externalNetworkOrigins: [...externalNetworkOrigins], securityMessages, consoleErrors, artifacts: ['.qa/permitkeep-desktop.png', '.qa/permitkeep-mobile.png'] }, null, 2));
   ws.close();
 } finally {
   browser.kill();

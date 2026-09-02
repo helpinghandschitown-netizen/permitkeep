@@ -24,7 +24,7 @@ export function saveRecords(records, storage = globalThis.localStorage) {
 
 export function upsertRecord(records, input, options = {}) {
   const existing = input.id ? records.find((record) => record.id === input.id) : null;
-  const next = createRecord({ ...existing, ...input }, { id: input.id || options.id, now: options.now });
+  const next = createRecord({ ...existing, ...input }, { id: input.id || options.id, now: options.now || new Date().toISOString() });
   return existing ? records.map((record) => record.id === next.id ? next : record) : [...records, next];
 }
 

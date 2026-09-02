@@ -95,3 +95,11 @@ test('calendar export contains renewal and expiration events without unsafe HTML
   assert.match(ics, /DTSTART;VALUE=DATE:20261231/);
   assert.match(ics, /END:VCALENDAR/);
 });
+
+test('calendar export folds every physical line at 75 UTF-8 octets', () => {
+  const record = createRecord({ ...base, name: `Permit ${'é'.repeat(290)}`, location: 'L'.repeat(290), agency: 'A'.repeat(290), permitNumber: 'P'.repeat(290) }, { id: 'fold', now: '2026-09-02T12:00:00.000Z' });
+  const ics = buildCalendar([record], '2026-09-02T12:00:00.000Z');
+  const lines = ics.split('\r\n').filter(Boolean);
+  assert.ok(lines.every((line) => Buffer.byteLength(line, 'utf8') <= 75));
+  assert.ok(lines.some((line) => line.startsWith(' ')));
+});

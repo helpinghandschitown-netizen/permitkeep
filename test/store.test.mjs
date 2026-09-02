@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRecord } from '../src/core.mjs';
-import { loadRecords, saveRecords, STORAGE_KEY } from '../src/store.mjs';
+import { loadRecords, saveRecords, STORAGE_KEY, upsertRecord } from '../src/store.mjs';
 
 const base = {
   name: 'Operating permit',
@@ -35,4 +35,11 @@ test('local store rejects duplicate identifiers', () => {
   const record = createRecord(base, { id: 'same', now: '2026-09-02T12:00:00.000Z' });
   const storage = memoryStorage({ [STORAGE_KEY]: JSON.stringify([record, { ...record, name: 'Other permit' }]) });
   assert.throws(() => loadRecords(storage), /duplicate identifiers/i);
+});
+
+test('editing a record preserves createdAt and refreshes updatedAt', () => {
+  const record = createRecord(base, { id: 'one', now: '2026-09-01T12:00:00.000Z' });
+  const [edited] = upsertRecord([record], { ...record, name: 'Updated permit' }, { now: '2026-09-02T12:00:00.000Z' });
+  assert.equal(edited.createdAt, '2026-09-01T12:00:00.000Z');
+  assert.equal(edited.updatedAt, '2026-09-02T12:00:00.000Z');
 });
