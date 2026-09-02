@@ -1,0 +1,14 @@
+{
+  "name": "permitkeep",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/core.mjs && node --check src/store.mjs && node --check src/app.mjs && node --check sw.js",
+    "e2e": "node scripts/e2e.mjs",
+    "review": "node scripts/release-review.mjs",
+    "verify": "npm test && npm run check && npm run review && npm run e2e",
+    "serve": "python -m http.server 4188"
+  }
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PermitKeep icon">
+  <rect width="512" height="512" rx="112" fill="#102a2a"/>
+  <path d="M143 114h226a29 29 0 0 1 29 29v226a29 29 0 0 1-29 29H143a29 29 0 0 1-29-29V143a29 29 0 0 1 29-29Z" fill="#b9f1d6"/>
+  <path d="M175 87v84M337 87v84M114 205h284" fill="none" stroke="#102a2a" stroke-width="30" stroke-linecap="round"/>
+  <path d="m186 294 44 44 102-111" fill="none" stroke="#2f8f68" stroke-width="31" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

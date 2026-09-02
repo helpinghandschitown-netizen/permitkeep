@@ -1,0 +1,14 @@
+{
+  "name": "PermitKeep",
+  "short_name": "PermitKeep",
+  "description": "Private permit and renewal deadline tracking for local operators.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#102a2a",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
