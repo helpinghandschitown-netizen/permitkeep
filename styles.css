@@ -158,12 +158,60 @@ footer span:first-child { color: var(--ink); font-weight: 850; }
 .recovery-panel { max-width: 760px; margin: 60px auto 100px; }
 .recovery-panel h1 { color: var(--ink); font-size: clamp(2.5rem, 7vw, 4.8rem); }
 .recovery-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.pro-panel, .pro-workspace { margin-top: 24px; scroll-margin-top: 20px; }
+.pro-preview { max-width: 850px; margin: 0 auto; }
+.pro-preview h2, .pro-workspace > .section-heading h2, .activity-panel h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3.3rem); line-height: 1; letter-spacing: -.035em; font-weight: 500; }
+.commercial-note { color: var(--muted); font-size: .86rem; }
+.pro-offer { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 24px 0 12px; border: 1px solid var(--line); border-radius: 16px; background: #eef8f1; padding: 18px; }
+.pro-offer div { display: grid; gap: 2px; }
+.pro-offer strong { font-family: Georgia, serif; font-size: 1.65rem; font-weight: 500; }
+.pro-offer span { color: var(--muted); font-size: .8rem; }
+.license-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 14px; margin-top: 24px; }
+.license-form > div { display: grid; gap: 6px; }
+.license-form p { min-height: 1.2em; margin: 0; font-size: .78rem; }
+.license-active { margin: 0; border-left: 4px solid var(--mint-strong); background: #eef8f1; padding: 14px 18px; }
+.pro-workspace { padding: 70px 0 0; }
+.pro-kpis, .report-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 20px; }
+.pro-kpis span, .report-totals span { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 16px; color: var(--muted); font-size: .76rem; font-weight: 760; }
+.pro-kpis strong, .report-totals strong { display: block; color: var(--ink); font-family: Georgia, serif; font-size: 1.65rem; font-weight: 500; }
+.step-editor h3 { margin: 0 0 22px; font-family: Georgia, serif; font-size: 1.7rem; font-weight: 500; }
+.step-list { display: grid; gap: 12px; margin: 18px 0 54px; }
+.step-card { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 18px 20px; }
+.step-card.completed { opacity: .72; }
+.step-card h3 { margin: 0; font-family: Georgia, serif; font-size: 1.28rem; font-weight: 500; }
+.step-card p:not(.eyebrow) { margin: 4px 0 0; color: var(--muted); font-size: .82rem; }
+.step-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.step-actions .button { min-height: 36px; padding: 6px 10px; font-size: .72rem; }
+.record-work-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 18px; margin-top: 16px; border-radius: 10px; background: #edf5ef; padding: 11px 13px; font-size: .78rem; }
+.record-work-summary span { color: var(--muted); }
+.portfolio-report { margin: 0 0 24px; border: 1px solid var(--line); border-radius: var(--radius); background: white; padding: clamp(24px, 4vw, 46px); box-shadow: var(--shadow); }
+.report-heading { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+.report-heading h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3.3rem); font-weight: 500; line-height: 1; }
+.report-totals { grid-template-columns: repeat(5, 1fr); margin-top: 26px; }
+.report-tabs { display: flex; gap: 7px; margin: 22px 0; }
+.next-due { border-left: 4px solid var(--gold); background: #fff8e6; padding: 12px 15px; }
+.report-group { break-inside: avoid; margin-top: 28px; }
+.report-group h3, .report-exceptions h3 { margin: 0 0 10px; font-family: Georgia, serif; font-size: 1.45rem; font-weight: 500; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+th, td { border-bottom: 1px solid var(--line); padding: 10px 8px; text-align: left; vertical-align: top; }
+thead th { color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; }
+.report-exceptions { margin-top: 32px; break-inside: avoid; }
+.activity-panel { margin-top: 24px; }
+.activity-list { display: grid; gap: 0; padding: 0; list-style: none; }
+.activity-list li { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 18px; border-top: 1px solid var(--line); padding: 11px 0; font-size: .82rem; }
+.activity-list time { color: var(--muted); }
+.license-panel { margin-top: 24px; }
+.empty.compact { min-height: 150px; }
 
 @media (max-width: 900px) {
   .hero { min-height: auto; padding: 58px 7%; grid-template-columns: 1fr; gap: 45px; }
   .deadline-preview { max-width: 520px; transform: none; }
   .record-grid { grid-template-columns: repeat(2, 1fr); }
   .data-tools { grid-template-columns: 1fr; gap: 28px; }
+  .report-totals { grid-template-columns: repeat(3, 1fr); }
+  .step-card { grid-template-columns: minmax(0, 1fr) auto; }
+  .step-actions { grid-column: 1 / -1; }
 }
 @media (max-width: 650px) {
   .site-header, main, footer { width: min(100% - 24px, 1180px); }
@@ -185,7 +233,22 @@ footer span:first-child { color: var(--ink); font-weight: 850; }
   .record-actions { justify-content: stretch; }
   .record-actions .button { flex: 1; }
   .tool-actions { grid-template-columns: 1fr; }
+  .license-form, .pro-kpis, .report-totals { grid-template-columns: 1fr; }
+  .pro-offer { align-items: stretch; flex-direction: column; }
+  .step-card { grid-template-columns: 1fr; }
+  .activity-list li { grid-template-columns: 1fr; gap: 3px; }
+  .report-heading { flex-direction: column; }
   footer { flex-direction: column; padding-bottom: 35px; }
+}
+@media print {
+  body { background: white; }
+  body > * { display: none !important; }
+  #app { display: block !important; }
+  #app > header, #app > footer, #app main > * { display: none !important; }
+  #app main, #app .pro-workspace, #app #portfolio-report { display: block !important; width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; }
+  .no-print { display: none !important; }
+  .portfolio-report { color: black; }
+  .table-wrap { overflow: visible; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

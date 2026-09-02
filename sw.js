@@ -1,5 +1,5 @@
-const CACHE = 'permitkeep-v4';
-const ASSETS = ['./', './index.html', './styles.css', './icon.svg', './manifest.webmanifest', './src/app.mjs', './src/core.mjs', './src/store.mjs', './privacy.html', './permit-renewal-tracking-checklist.html', './multi-location-license-renewal-process.html', './restaurant-permit-renewal-calendar.html'];
+const CACHE = 'permitkeep-v6';
+const ASSETS = ['./', './index.html', './styles.css', './icon.svg', './manifest.webmanifest', './src/app.mjs', './src/core.mjs', './src/store.mjs', './src/crypto.mjs', './src/license.mjs', './privacy.html', './terms.html', './permit-renewal-tracking-checklist.html', './multi-location-license-renewal-process.html', './restaurant-permit-renewal-calendar.html'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting()));

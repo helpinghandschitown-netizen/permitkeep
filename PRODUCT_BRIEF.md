@@ -29,7 +29,7 @@ Small local operators with several locations can have dozens of business license
 
 ## Commercial hypothesis
 
-A polished one-time local-first edition can validate willingness to pay without creating a false cloud-monitoring promise. Pricing, free limits, license fulfillment, refund terms, and checkout remain undecided until full QA and a real purchase path are ready. No revenue or customer claims are authorized.
+The free edition keeps unlimited deadline records and portable exports. PermitKeep Pro v1 adds a coherent operations layer: renewal work plans, a print/PDF portfolio review, and local activity history. The provisional launch hypothesis is $39 one time for Pro v1, subject to a complete test-mode purchase, signed-webhook fulfillment, exact-session claim, activation, and production commerce review. Checkout remains disabled. No revenue or customer claims are authorized without Stripe readback.
 
 ## Risks and gates
 

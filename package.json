@@ -1,11 +1,11 @@
 {
   "name": "permitkeep",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/core.mjs && node --check src/store.mjs && node --check src/app.mjs && node --check sw.js",
+    "check": "node --check src/core.mjs && node --check src/store.mjs && node --check src/crypto.mjs && node --check src/license.mjs && node --check src/app.mjs && node --check sw.js && node --check fulfillment/lib.mjs && node --check fulfillment/file-ledger.mjs && node --check fulfillment/server.mjs && node --check scripts/issue-license.mjs",
     "e2e": "node scripts/e2e.mjs",
     "review": "node scripts/release-review.mjs",
     "verify": "npm test && npm run check && npm run review && npm run e2e",

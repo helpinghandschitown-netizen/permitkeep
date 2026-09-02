@@ -51,3 +51,14 @@ A separate-model review initially failed the gate with two high-severity and thr
 - GitHub Pages: `https://helpinghandschitown-netizen.github.io/permitkeep/` (HTTPS enforced, HTTP 200).
 - Clean headless Chrome readback rendered the production heading, record form, checklist link, and privacy link.
 - The host does not emit a `Content-Security-Policy` response header. The strict meta CSP remains active, but no clickjacking-protection claim is made.
+
+## PermitKeep Pro v1 local release candidate
+
+- The free boundary remains intact: unlimited deadline records, backup/restore, deadline CSV, and calendar export remain available without a Pro license.
+- Pro adds renewal work plans, a print/PDF-ready portfolio report, and candid local activity history. Schema-1 free backups migrate to schema 2 and Pro data round-trips without making free backups unrestorable.
+- Signed P-256 licenses verify offline against the bundled product-specific public key; malformed, altered, and wrong-product codes fail closed without deleting records.
+- Checkout copy is deliberately disabled. The stale mismatched live link and $29 assertions are absent from the product UI and documentation.
+- The local commerce protocol verifies raw signed webhook bodies, enforces mode/product/price/quantity, deduplicates events and sessions, blocks adverse events received before completion, ignores stale completion events after newer failures, and derives stable Stripe idempotency keys from browser-held opaque checkout-attempt IDs.
+- The file ledger is explicitly a local-test adapter, not a production fulfillment store. Public checkout remains blocked on a shared transactional production database, public HTTPS runtime, secret injection, backups, redacted logging, rate limits, and a real Stripe test purchase/claim/activation.
+- Final local verification: 29 tests passed, syntax checks passed, 33 static controls passed, and desktop/mobile browser E2E passed with zero external runtime origins, security messages, browser exceptions, accessibility-name failures, contrast failures, or horizontal overflow.
+- Clean primary desktop and mobile screenshots contain no transient quota-error overlay. Failure-path coverage remains in the automated E2E result rather than the release imagery.

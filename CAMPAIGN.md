@@ -2,7 +2,7 @@
 
 ## Current status
 
-The static product and original owned-search guide are prepared for public GitHub Pages deployment. The sale, checkout, and promotional launch remain gated until a product-specific live Stripe product, one-time price, and payment link are created and read back.
+The free static product and owned-search guides are live. PermitKeep Pro v1 is implemented and locally verified, but checkout and paid promotion remain disabled. An interrupted mismatched live offer is not part of the release; the accepted commercial path is a $39 one-time test offer followed by real signed-webhook, claim, and activation verification before any live sale.
 
 ## Positioning
 

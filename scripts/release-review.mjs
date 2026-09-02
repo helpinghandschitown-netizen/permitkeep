@@ -3,8 +3,8 @@ import path from 'node:path';
 
 const root = path.resolve('.');
 const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
-const htmlNames = ['index.html', 'privacy.html', 'permit-renewal-tracking-checklist.html', 'multi-location-license-renewal-process.html', 'restaurant-permit-renewal-calendar.html'];
-const runtimeNames = [...htmlNames, 'styles.css', 'manifest.webmanifest', 'sw.js', 'src/app.mjs', 'src/core.mjs', 'src/store.mjs'];
+const htmlNames = ['index.html', 'privacy.html', 'terms.html', 'permit-renewal-tracking-checklist.html', 'multi-location-license-renewal-process.html', 'restaurant-permit-renewal-calendar.html'];
+const runtimeNames = [...htmlNames, 'styles.css', 'manifest.webmanifest', 'sw.js', 'src/app.mjs', 'src/core.mjs', 'src/store.mjs', 'src/crypto.mjs', 'src/license.mjs'];
 const runtime = Object.fromEntries(runtimeNames.map((name) => [name, read(name)]));
 const results = [];
 const check = (condition, control, detail) => results.push({ control, passed: Boolean(condition), detail });
@@ -12,7 +12,7 @@ const check = (condition, control, detail) => results.push({ control, passed: Bo
 const packageData = JSON.parse(read('package.json'));
 const manifest = JSON.parse(read('manifest.webmanifest'));
 const html = htmlNames.map((name) => runtime[name]).join('\n');
-const appRuntime = `${runtime['src/app.mjs']}\n${runtime['src/core.mjs']}\n${runtime['src/store.mjs']}`;
+const appRuntime = `${runtime['src/app.mjs']}\n${runtime['src/core.mjs']}\n${runtime['src/store.mjs']}\n${runtime['src/crypto.mjs']}\n${runtime['src/license.mjs']}`;
 
 check(!packageData.dependencies && !packageData.devDependencies, 'dependency surface', 'No runtime or development packages are required.');
 check(!/\b(?:XMLHttpRequest|WebSocket|EventSource|sendBeacon)\b|\bfetch\s*\(/.test(appRuntime), 'zero-data application network surface', 'Application modules contain no outbound network APIs.');
@@ -46,7 +46,14 @@ check(runtime['src/core.mjs'].includes('duplicate record identifier') && runtime
 check(runtime['src/core.mjs'].includes('/^[=+\\-@]/') && runtime['src/core.mjs'].includes("replaceAll('\\n', '\\\\n')"), 'export injection controls', 'CSV formula prefixes and calendar text/newlines are neutralized.');
 check(runtime['src/app.mjs'].includes('const escapeHtml') && runtime['src/app.mjs'].includes('rel="noopener noreferrer"'), 'render and opener controls', 'User text is escaped before template rendering and new tabs block opener access.');
 check(runtime['privacy.html'].includes('Local storage is not a secure vault') && runtime['privacy.html'].includes('does not determine required permits') && runtime['privacy.html'].includes('no analytics'), 'privacy and operational disclosure', 'Storage, tracking, and compliance boundaries are stated.');
-check(runtime['src/app.mjs'].includes('storageRecovery') && runtime['src/app.mjs'].includes('Download damaged data') && runtime['src/app.mjs'].includes('Reset local data'), 'corrupt-storage recovery gate', 'Unreadable local data blocks normal writes and offers raw download plus explicit reset.');
+check(runtime['terms.html'].includes('not currently offered for purchase') && runtime['terms.html'].includes('signature-verified webhook') && runtime['terms.html'].includes('14 days'), 'commercial terms safety state', 'Terms keep checkout disabled until test-mode fulfillment is verified.');
+check(runtime['src/app.mjs'].includes('Checkout is not available yet') && runtime['src/app.mjs'].includes('Purchase unavailable') && !/buy\.stripe\.com|\$29|2900/.test(runtime['src/app.mjs']), 'checkout disabled gate', 'No stale live link or mismatched price remains in the product UI.');
+check(runtime['src/app.mjs'].includes('storageRecovery') && runtime['src/app.mjs'].includes('Download damaged data') && runtime['src/app.mjs'].includes('Reset damaged local data'), 'corrupt-storage recovery gate', 'Unreadable local data blocks normal writes and offers raw download plus explicit reset.');
+check(runtime['src/license.mjs'].includes("crypto.subtle.verify") && runtime['src/license.mjs'].includes("permitkeep-pro-v1") && !runtime['src/license.mjs'].includes('private'), 'offline signed-license boundary', 'The app bundles only a product-specific public verification key and fails closed for wrong-product licenses.');
+check(runtime['src/core.mjs'].includes('createWorkStep') && runtime['src/core.mjs'].includes('buildPortfolioReview') && runtime['src/core.mjs'].includes('createActivityEntry'), 'coherent Pro value bundle', 'Work plans, portfolio review, and local activity history are implemented as one bundle.');
+check(runtime['src/core.mjs'].includes('LEGACY_BACKUP_SCHEMA') && runtime['src/core.mjs'].includes("pro: { steps, activity }") && runtime['src/app.mjs'].includes('importFullBackup'), 'Pro backup migration', 'Schema-1 free backups migrate and schema-2 backups preserve Pro work plans and history.');
+check(!/FREE_RECORD_LIMIT|free records used|unlimited local records/i.test(appRuntime), 'free product boundary', 'No artificial record limit or cosmetic limit-removal sale is present.');
+check(runtime['src/app.mjs'].includes('Print / save PDF') && runtime['styles.css'].includes('@media print') && runtime['src/app.mjs'].includes('Missing-data exceptions'), 'portfolio report output', 'The local report is print/PDF ready and includes missing-data exceptions.');
 check(!runtime['styles.css'].includes('rgba(47,143,104,.3)') && runtime['styles.css'].includes('input::placeholder, textarea::placeholder { color: var(--muted); }'), 'focus and placeholder contrast', 'Focus indicators are opaque and placeholder text uses the verified muted-text color.');
 check(runtimeNames.every((name) => runtime[name].split(/\r?\n/).length < 400), 'maintainable module size', 'Every runtime source file remains below 400 lines.');
 

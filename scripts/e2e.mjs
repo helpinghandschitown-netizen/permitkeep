@@ -1,7 +1,21 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { canonicalize, encodeEnvelope, toBase64Url } from '../src/crypto.mjs';
+
+async function createQaLicense() {
+  const keyPath = process.env.PERMITKEEP_LICENSE_PRIVATE_KEY || path.join(os.homedir(), 'AppData', 'Local', 'hermes', 'secrets', 'permitkeep-license-private.jwk');
+  const privateJwk = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
+  const license = { product: 'permitkeep-pro-v1', grant: 'lifetime-v1', licenseId: 'lic_qa_opaque', orderRef: 'cs_test_qa_opaque', issuedAt: '2026-09-02T18:00:00.000Z' };
+  const unsigned = { kind: 'permitkeep-license', protocol: 1, license };
+  const key = await crypto.subtle.importKey('jwk', privateJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  const signature = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(canonicalize(unsigned)));
+  return encodeEnvelope({ ...unsigned, signature: toBase64Url(new Uint8Array(signature)) });
+}
+
+const qaLicenseCode = await createQaLicense();
 
 const chrome = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const port = 9348;
@@ -170,12 +184,37 @@ try {
   })`);
   if (flow.stored !== 1 || !flow.status.includes('Renew now') || flow.renewal !== '2026-08-16' || flow.agencyLink !== 'https://example.gov/renew' || flow.summary[0] !== 1) throw new Error(`Core browser flow failed: ${JSON.stringify(flow)}`);
 
+  const freeBoundary = await evaluate(`({ hasStepForm: Boolean(document.querySelector('#step-form')), copy: document.querySelector('#pro')?.textContent || '' })`);
+  if (freeBoundary.hasStepForm || /record limit|records used|unlimited records/i.test(freeBoundary.copy)) throw new Error(`Free/Pro boundary failed: ${JSON.stringify(freeBoundary)}`);
+  await evaluate(`(() => { const form = document.querySelector('#license-form'); form.elements.code.value = ${JSON.stringify(qaLicenseCode)}; form.requestSubmit(); })()`);
+  await waitFor(`document.querySelector('#step-form') && document.body.textContent.includes('PermitKeep Pro v1 active')`, 'signed Pro activation');
+  await evaluate(`(() => {
+    const form = document.querySelector('#step-form');
+    form.elements.recordId.value = JSON.parse(localStorage.getItem('permitkeep.records.v1'))[0].id;
+    form.elements.title.value = 'Confirm current fee and documents';
+    form.elements.owner.value = 'Operations lead';
+    form.elements.targetDate.value = '2026-08-30';
+    form.elements.note.value = 'Use only the official agency page.';
+    form.requestSubmit();
+  })()`);
+  await waitFor(`document.querySelector('.step-card') && document.querySelector('#portfolio-report') && document.querySelector('.activity-list li')`, 'Pro work plan and report');
+  const proFlow = await evaluate(`({
+    steps: JSON.parse(localStorage.getItem('permitkeep.pro-data.v1')).steps.length,
+    activity: JSON.parse(localStorage.getItem('permitkeep.pro-data.v1')).activity.length,
+    overdueInRecord: document.querySelector('.record-work-summary')?.textContent.includes('overdue step'),
+    reportGroups: document.querySelectorAll('[data-report-group]').length,
+    reportExceptions: document.querySelector('.report-exceptions')?.textContent.includes('Missing-data exceptions'),
+    printButton: Boolean(document.querySelector('#print-report')),
+    licenseStored: Boolean(localStorage.getItem('permitkeep.license.v1'))
+  })`);
+  if (proFlow.steps !== 1 || proFlow.activity < 2 || !proFlow.overdueInRecord || proFlow.reportGroups !== 3 || !proFlow.reportExceptions || !proFlow.printButton || !proFlow.licenseStored) throw new Error(`Pro browser flow failed: ${JSON.stringify(proFlow)}`);
+
   await evaluate(`document.querySelector('#backup-export').click()`);
   for (let i = 0; i < 80 && !fs.readdirSync(downloads).some((name) => name.endsWith('.json')); i++) await pause(100);
   const backupName = fs.readdirSync(downloads).find((name) => name.endsWith('.json'));
   if (!backupName) throw new Error('Backup download did not complete.');
   const downloadedBackup = JSON.parse(fs.readFileSync(path.join(downloads, backupName), 'utf8'));
-  if (downloadedBackup.schema !== 1 || downloadedBackup.records.length !== 1) throw new Error('Downloaded backup did not contain the saved record.');
+  if (downloadedBackup.schema !== 2 || downloadedBackup.records.length !== 1 || downloadedBackup.pro.steps.length !== 1 || downloadedBackup.pro.activity.length < 2) throw new Error('Downloaded backup did not contain the free and Pro data.');
 
   const chooseBackup = async (name, text, confirmResult = true) => evaluate(`(async () => {
     window.confirm = () => ${confirmResult};
@@ -193,7 +232,7 @@ try {
   const secondRecord = { ...downloadedBackup.records[0], id: 'second-record', name: 'Second permit', updatedAt: '2026-09-02T13:00:00.000Z' };
   const twoRecordBackup = JSON.stringify({ ...downloadedBackup, records: [downloadedBackup.records[0], secondRecord] });
   const restored = await chooseBackup('two-records.json', twoRecordBackup);
-  if (restored.count !== 2 || restored.value !== '' || !/2 record\(s\) restored/i.test(restored.toast)) throw new Error(`Valid restore failed: ${JSON.stringify(restored)}`);
+  if (restored.count !== 2 || restored.value !== '' || !/2 record\(s\).*restored/i.test(restored.toast)) throw new Error(`Valid restore failed: ${JSON.stringify(restored)}`);
   const cancelled = await chooseBackup('one-record.json', JSON.stringify(downloadedBackup), false);
   if (cancelled.count !== 2 || cancelled.value !== '') throw new Error(`Cancelled restore changed data or left the chooser dirty: ${JSON.stringify(cancelled)}`);
 
@@ -210,6 +249,10 @@ try {
     return { unchanged: localStorage.getItem('permitkeep.records.v1') === before, cards: document.querySelectorAll('.record-card').length, toast: document.querySelector('#toast').textContent, tone: document.querySelector('#toast').dataset.tone };
   })()`);
   if (!quotaFailure.unchanged || quotaFailure.cards !== 2 || quotaFailure.tone !== 'error' || !/quota/i.test(quotaFailure.toast)) throw new Error(`Storage failure was not atomic: ${JSON.stringify(quotaFailure)}`);
+
+  await send('Page.reload', { ignoreCache: true }, sessionId);
+  await waitFor(`document.querySelectorAll('.record-card').length === 2 && document.querySelector('#step-form')`, 'clean persisted Pro reload');
+  await evaluate(`window.scrollTo(0, 0)`);
 
   const axTree = await send('Accessibility.getFullAXTree', {}, sessionId);
   const interactiveRoles = new Set(['button', 'link', 'textbox', 'combobox', 'spinbutton']);
@@ -244,13 +287,19 @@ try {
   const desktopShot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, sessionId);
   fs.writeFileSync('.qa/permitkeep-desktop.png', Buffer.from(desktopShot.data, 'base64'));
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true }, sessionId);
+  await evaluate(`window.scrollTo(0, 0)`);
   await pause(250);
   const mobile = await evaluate(`({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth, cards: document.querySelectorAll('.record-card').length, editorVisible: Boolean(document.querySelector('#record-form')) })`);
   if (mobile.scrollWidth > mobile.width || mobile.cards !== 2 || !mobile.editorVisible) throw new Error(`Mobile layout failed: ${JSON.stringify(mobile)}`);
   const mobileShot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }, sessionId);
   fs.writeFileSync('.qa/permitkeep-mobile.png', Buffer.from(mobileShot.data, 'base64'));
+  await evaluate(`document.querySelector('#pro').scrollIntoView()`);
+  await pause(250);
+  const proMobileShot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }, sessionId);
+  fs.writeFileSync('.qa/permitkeep-pro-mobile.png', Buffer.from(proMobileShot.data, 'base64'));
 
-  await waitFor(`navigator.serviceWorker?.controller && caches.keys().then((keys) => keys.includes('${baseCache}'))`, 'initial service worker activation');
+  await evaluate(`navigator.serviceWorker.getRegistration().then((registration) => registration || navigator.serviceWorker.register('./sw.js')).then((registration) => registration.update())`);
+  await waitFor(`navigator.serviceWorker.ready.then(() => caches.keys()).then((keys) => keys.includes('${baseCache}'))`, 'initial service worker activation');
   await evaluate(`caches.open('sibling-app-v1').then((cache) => cache.put('./sibling-probe', new Response('keep me')))`);
   await stopServer();
   await send('Page.reload', { ignoreCache: true }, sessionId);
@@ -276,7 +325,7 @@ try {
   if (externalNetworkOrigins.size) throw new Error(`Unexpected external network origins: ${[...externalNetworkOrigins].join(', ')}`);
   if (consoleErrors.length) throw new Error(`Browser exceptions: ${consoleErrors.join('; ')}`);
 
-  console.log(JSON.stringify({ passed: true, baseline, corruptRecovery, privacyPage, guidePages, flow, backupRestore: { malformed, restored, cancelled, downloadedRecords: downloadedBackup.records.length }, quotaFailure, accessibility: { ...accessibility, unnamedAxNodes }, reducedMotion, mobile, offline, upgrade, externalNetworkOrigins: [...externalNetworkOrigins], securityMessages, consoleErrors, artifacts: ['.qa/permitkeep-desktop.png', '.qa/permitkeep-mobile.png'] }, null, 2));
+  console.log(JSON.stringify({ passed: true, baseline, corruptRecovery, privacyPage, guidePages, flow, freeBoundary, proFlow, backupRestore: { malformed, restored, cancelled, downloadedRecords: downloadedBackup.records.length, downloadedSteps: downloadedBackup.pro.steps.length, downloadedActivity: downloadedBackup.pro.activity.length }, quotaFailure, accessibility: { ...accessibility, unnamedAxNodes }, reducedMotion, mobile, offline, upgrade, externalNetworkOrigins: [...externalNetworkOrigins], securityMessages, consoleErrors, artifacts: ['.qa/permitkeep-desktop.png', '.qa/permitkeep-mobile.png', '.qa/permitkeep-pro-mobile.png'] }, null, 2));
   ws.close();
 } finally {
   browser.kill();

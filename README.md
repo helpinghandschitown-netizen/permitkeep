@@ -4,7 +4,7 @@ PermitKeep is a private, local-first permit and renewal deadline desk for multi-
 
 ## Current product lane
 
-The production static application is live at https://helpinghandschitown-netizen.github.io/permitkeep/. A product-specific live Stripe offer remains a separate gate; do not infer that the public deployment is already purchasable.
+The free production application is live at https://helpinghandschitown-netizen.github.io/permitkeep/. PermitKeep Pro v1 is implemented locally, but checkout is disabled until the accepted $39 test offer, signed webhook fulfillment, exact-session claim, and activation pass end to end. An interrupted mismatched live offer is not part of the release and must not be published or promoted.
 
 Owned educational resources cover the general renewal workflow, multi-location handoffs, and restaurant deadline-calendar operations. They organize user-verified facts and do not identify required permits or replace official agency guidance.
 
@@ -26,6 +26,10 @@ Open `http://127.0.0.1:4188/` after starting the server.
 - CSV export neutralizes spreadsheet formula prefixes.
 - Calendar export creates renewal-start and expiration events.
 - Content Security Policy blocks network connections from app code.
+
+## Free and Pro
+
+The free edition keeps unlimited deadline records, backup/restore, deadline CSV, and calendar export. PermitKeep Pro v1 adds renewal work plans, a print/PDF portfolio review, and local activity history. A signed offline license code verifies locally; the private signing key is stored outside the repository.
 
 ## Safety boundary
 
