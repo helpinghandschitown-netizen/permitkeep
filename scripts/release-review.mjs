@@ -3,14 +3,15 @@ import path from 'node:path';
 
 const root = path.resolve('.');
 const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
-const runtimeNames = ['index.html', 'privacy.html', 'permit-renewal-tracking-checklist.html', 'styles.css', 'manifest.webmanifest', 'sw.js', 'src/app.mjs', 'src/core.mjs', 'src/store.mjs'];
+const htmlNames = ['index.html', 'privacy.html', 'permit-renewal-tracking-checklist.html', 'multi-location-license-renewal-process.html', 'restaurant-permit-renewal-calendar.html'];
+const runtimeNames = [...htmlNames, 'styles.css', 'manifest.webmanifest', 'sw.js', 'src/app.mjs', 'src/core.mjs', 'src/store.mjs'];
 const runtime = Object.fromEntries(runtimeNames.map((name) => [name, read(name)]));
 const results = [];
 const check = (condition, control, detail) => results.push({ control, passed: Boolean(condition), detail });
 
 const packageData = JSON.parse(read('package.json'));
 const manifest = JSON.parse(read('manifest.webmanifest'));
-const html = `${runtime['index.html']}\n${runtime['privacy.html']}\n${runtime['permit-renewal-tracking-checklist.html']}`;
+const html = htmlNames.map((name) => runtime[name]).join('\n');
 const appRuntime = `${runtime['src/app.mjs']}\n${runtime['src/core.mjs']}\n${runtime['src/store.mjs']}`;
 
 check(!packageData.dependencies && !packageData.devDependencies, 'dependency surface', 'No runtime or development packages are required.');
@@ -22,7 +23,7 @@ check(!externalRuntimeResource.test(html), 'external static resources', 'HTML lo
 check(!/\sstyle=["']/i.test(html), 'CSP-compatible styling', 'HTML contains no inline style attributes.');
 check(!/<script(?![^>]*\bsrc=)[^>]*>\s*[^<]/i.test(html), 'inline script surface', 'HTML contains no executable inline scripts.');
 
-for (const name of ['index.html', 'privacy.html', 'permit-renewal-tracking-checklist.html']) {
+for (const name of htmlNames) {
   const csp = runtime[name].match(/Content-Security-Policy" content="([^"]+)/)?.[1] ?? '';
   check(csp.includes("default-src 'self'") && csp.includes("connect-src 'none'") && csp.includes("object-src 'none'") && csp.includes("base-uri 'none'") && !csp.includes("'unsafe-inline'") && !csp.includes("'unsafe-eval'") && !csp.includes('frame-ancestors'), `${name} CSP`, 'Self-only static resources, no connections/objects/base rewriting, no ineffective meta frame-ancestors claim.');
 }
@@ -33,7 +34,7 @@ const missingAssets = cacheAssets.filter((asset) => {
   if (asset === './') return !fs.existsSync(path.join(root, 'index.html'));
   return !fs.existsSync(path.join(root, asset.replace(/^\.\//, '')));
 });
-check(cacheAssets.length >= 9 && !missingAssets.length, 'offline asset manifest', missingAssets.length ? `Missing: ${missingAssets.join(', ')}` : `${cacheAssets.length} declared cache assets exist.`);
+check(cacheAssets.length >= 12 && !missingAssets.length, 'offline asset manifest', missingAssets.length ? `Missing: ${missingAssets.join(', ')}` : `${cacheAssets.length} declared cache assets exist.`);
 check(runtime['sw.js'].includes("event.request.method !== 'GET'") && runtime['sw.js'].includes('origin !== self.location.origin'), 'service-worker request boundary', 'Only same-origin GET requests enter cache handling.');
 check(runtime['sw.js'].includes('keys.filter((key) => key !== CACHE)') && runtime['sw.js'].includes('self.clients.claim()'), 'service-worker upgrade cleanup', 'Old named caches are removed and upgraded workers claim clients.');
 

@@ -6,6 +6,8 @@ PermitKeep is a private, local-first permit and renewal deadline desk for multi-
 
 The production static application is live at https://helpinghandschitown-netizen.github.io/permitkeep/. A product-specific live Stripe offer remains a separate gate; do not infer that the public deployment is already purchasable.
 
+Owned educational resources cover the general renewal workflow, multi-location handoffs, and restaurant deadline-calendar operations. They organize user-verified facts and do not identify required permits or replace official agency guidance.
+
 ## Run and verify
 
 ```bash

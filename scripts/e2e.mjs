@@ -126,6 +126,22 @@ try {
     hasOperationalBoundary: document.body.textContent.includes('does not determine required permits')
   })`);
   if (privacyPage.h1Count !== 1 || privacyPage.inlineStyles || privacyPage.externalOrigins.length || !privacyPage.hasSecurityBoundary || !privacyPage.hasOperationalBoundary || securityMessages.length) throw new Error(`Privacy/CSP page review failed: ${JSON.stringify({ privacyPage, securityMessages })}`);
+
+  const guidePages = [];
+  for (const [page, heading] of [
+    ['multi-location-license-renewal-process.html', 'One renewal process'],
+    ['restaurant-permit-renewal-calendar.html', 'Build a renewal calendar'],
+  ]) {
+    await send('Page.navigate', { url: `http://127.0.0.1:${appPort}/${page}` }, sessionId);
+    await waitFor(`document.querySelector('h1')?.textContent.includes(${JSON.stringify(heading)})`, `${page} heading`);
+    const desktop = await evaluate(`({ h1Count: document.querySelectorAll('h1').length, horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, externalOrigins: [...performance.getEntriesByType('resource')].map((entry) => new URL(entry.name).origin).filter((origin) => origin !== location.origin), appLink: document.querySelector('a[href="./#editor"]')?.href || document.querySelector('a[href="./"]')?.href })`);
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true }, sessionId);
+    const mobileOverflow = await evaluate(`document.documentElement.scrollWidth > document.documentElement.clientWidth`);
+    await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false }, sessionId);
+    if (desktop.h1Count !== 1 || desktop.horizontalOverflow || desktop.externalOrigins.length || !desktop.appLink || mobileOverflow) throw new Error(`Owned guide browser review failed: ${JSON.stringify({ page, desktop, mobileOverflow })}`);
+    guidePages.push({ page, ...desktop, mobileOverflow });
+  }
+
   await send('Page.navigate', { url: `http://127.0.0.1:${appPort}/` }, sessionId);
   await waitFor(`document.querySelector('h1')?.textContent.includes('Know what expires')`, 'return to app');
 
@@ -251,7 +267,7 @@ try {
   if (externalNetworkOrigins.size) throw new Error(`Unexpected external network origins: ${[...externalNetworkOrigins].join(', ')}`);
   if (consoleErrors.length) throw new Error(`Browser exceptions: ${consoleErrors.join('; ')}`);
 
-  console.log(JSON.stringify({ passed: true, baseline, privacyPage, flow, backupRestore: { malformed, restored, cancelled, downloadedRecords: downloadedBackup.records.length }, quotaFailure, accessibility: { ...accessibility, unnamedAxNodes }, reducedMotion, mobile, offline, upgrade, externalNetworkOrigins: [...externalNetworkOrigins], securityMessages, consoleErrors, artifacts: ['.qa/permitkeep-desktop.png', '.qa/permitkeep-mobile.png'] }, null, 2));
+  console.log(JSON.stringify({ passed: true, baseline, privacyPage, guidePages, flow, backupRestore: { malformed, restored, cancelled, downloadedRecords: downloadedBackup.records.length }, quotaFailure, accessibility: { ...accessibility, unnamedAxNodes }, reducedMotion, mobile, offline, upgrade, externalNetworkOrigins: [...externalNetworkOrigins], securityMessages, consoleErrors, artifacts: ['.qa/permitkeep-desktop.png', '.qa/permitkeep-mobile.png'] }, null, 2));
   ws.close();
 } finally {
   browser.kill();
