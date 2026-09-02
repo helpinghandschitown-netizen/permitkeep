@@ -1,7 +1,7 @@
 # PermitKeep release review
 
 Reviewed: 2026-09-02  
-Scope: local static application, backup/restore, offline lifecycle, accessibility, privacy, security, and maintainability. Deployment, payment, brand clearance, and jurisdiction-specific legal review are separate gates.
+Scope: static application, backup/restore, offline lifecycle, accessibility, privacy, security, maintainability, and GitHub Pages deployment. Payment, comprehensive brand clearance, and jurisdiction-specific legal review are separate gates.
 
 ## Review method
 
@@ -36,3 +36,10 @@ Scope: local static application, backup/restore, offline lifecycle, accessibilit
 - Static meta CSP cannot provide `frame-ancestors`; any public host claiming anti-framing protection must prove a response-header policy by readback.
 - A fresh independent human or separate-model review was not available in this cron runtime. The deterministic static reviewer is separate from runtime tests but is not a substitute for specialist review.
 - Broader trademark/confusing-similarity clearance, jurisdiction-specific legal review, deployment headers, licensing/pricing, checkout, and fulfillment remain open.
+
+## Public deployment readback
+
+- Repository: `https://github.com/helpinghandschitown-netizen/permitkeep` (public, `main`).
+- GitHub Pages: `https://helpinghandschitown-netizen.github.io/permitkeep/` (HTTPS enforced, HTTP 200).
+- Clean headless Chrome readback rendered the production heading, record form, checklist link, and privacy link.
+- The host does not emit a `Content-Security-Policy` response header. The strict meta CSP remains active, but no clickjacking-protection claim is made.

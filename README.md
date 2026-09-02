@@ -4,7 +4,7 @@ PermitKeep is a private, local-first permit and renewal deadline desk for multi-
 
 ## Current product lane
 
-This repository is the active rank-2 product in Lawful Opportunity Lab. The production static application is being released through GitHub Pages. A product-specific live Stripe offer remains a separate gate; do not infer that a public deployment is already purchasable.
+The production static application is live at https://helpinghandschitown-netizen.github.io/permitkeep/. A product-specific live Stripe offer remains a separate gate; do not infer that the public deployment is already purchasable.
 
 ## Run and verify
 
