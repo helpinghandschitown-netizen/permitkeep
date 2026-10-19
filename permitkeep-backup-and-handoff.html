@@ -19,7 +19,24 @@
     <h1 class="privacy-title">A backup is only useful if the next person can restore it.</h1>
     <p class="lede">A renewal ledger needs a recovery plan, not just a download button. Use this checklist before changing devices, clearing browser data, or handing responsibility to another operator.</p>
     <div class="boundary"><strong>Restore replaces data. It does not merge two working ledgers.</strong><p>Download a backup of the destination browser before importing anything. Rehearse in a separate browser profile first, not over the only current copy.</p></div>
-    <h2>1. Choose the right export</h2>
+    <nav class="screen-only" aria-label="Recovery guide sections">
+      <h2>Find the recovery step you need</h2>
+      <ul>
+        <li><a href="#export-choice">Choose the right export</a></li>
+        <li><a href="#safe-export-sharing">Share an export safely</a></li>
+        <li><a href="#save-copy">Save a recovery copy</a></li>
+        <li><a href="#rehearse-recovery">Rehearse a restore</a></li>
+        <li><a href="#explicit-handoff">Hand off responsibility</a></li>
+        <li><a href="#handoff-record">Printable acceptance record</a></li>
+        <li><a href="#rehearsal-failure">Troubleshoot a failed rehearsal</a></li>
+        <li><a href="#conflicting-copies">Reconcile conflicting copies</a></li>
+        <li><a href="#browser-migration">Change browser or app address</a></li>
+        <li><a href="#failed-save-recovery">Preserve a draft after a failed save</a></li>
+        <li><a href="#offline-outage">Keep working through an internet outage</a></li>
+        <li><a href="#recovery-limits">Understand recovery limits</a></li>
+      </ul>
+    </nav>
+    <h2 id="export-choice">1. Choose the right export</h2>
     <ul>
       <li><strong>Download backup:</strong> the JSON recovery file contains deadline records and any stored Pro work plans and local activity history. Use this for restore.</li>
       <li><strong>Export deadlines CSV:</strong> a readable deadline list for review or a spreadsheet. It is not a full-fidelity restore file.</li>
@@ -38,7 +55,7 @@
       </ol>
       <p><strong>Final send check:</strong> correct recipient; minimum necessary information; actual file inspected; destination permissions checked; original recovery copy retained. Never send license codes, payment-return URLs, or sensitive filing contents with a routine ledger handoff.</p>
     </section>
-    <h2>2. Save a recovery copy outside the browser</h2>
+    <h2 id="save-copy">2. Save a recovery copy outside the browser</h2>
     <ol>
       <li>Open the working browser profile and check that you can see the expected locations and records. Clear search and select <strong>All</strong> before checking your inventory.</li>
       <li>In <strong>Portable by design</strong>, choose <strong>Download backup</strong>. Confirm that the JSON file actually arrived in your download folder.</li>
@@ -46,7 +63,7 @@
       <li>Record who exported it, the date, the record count, and the browser profile used. Export again after meaningful changes and before any device or browser migration.</li>
     </ol>
     <p>The export is plain data, not an encrypted vault. Anyone with the file can read its contents. Do not add passwords, card details, tax IDs, identity documents, or sensitive filings to the tracker. If you choose cloud storage for your backup, its privacy and access controls apply separately.</p>
-    <h2>3. Rehearse recovery without risking the original</h2>
+    <h2 id="rehearse-recovery">3. Rehearse recovery without risking the original</h2>
     <ol>
       <li>Create a separate browser profile and open the same trusted PermitKeep app URL. Leave the original profile untouched.</li>
       <li>If the destination already has data, download its backup first. Select <strong>Restore backup</strong> and choose the JSON file. Read any replacement confirmation before proceeding.</li>
@@ -55,7 +72,7 @@
       <li>Download a new backup from the destination and compare the records and stored work-plan/history content. Export timestamps can differ. Keep the original recovery file until the handoff is accepted.</li>
     </ol>
     <p>If the file is rejected or storage cannot be written, stop. Preserve the original file and working browser. Do not clear the source browser's data to troubleshoot the destination, and do not hand-edit a backup just to bypass validation.</p>
-    <h2>4. Make the handoff explicit</h2>
+    <h2 id="explicit-handoff">4. Make the handoff explicit</h2>
     <p>Two browsers holding copies are not a shared team account. Agree which profile becomes the working ledger and who is responsible for updates. Otherwise two well-intentioned operators can create conflicting versions.</p>
     <ul>
       <li><strong>Outgoing owner:</strong> export a final backup and identify urgent renewals, missing information, agency contacts, and unfinished work.</li>
@@ -78,7 +95,7 @@
       </dl>
       <p>Retain the original recovery copy until acceptance. Do not clear the source browser while any exception is unresolved. Do not record passwords, license codes, or sensitive filing contents here.</p>
     </section>
-    <h2>If the rehearsal fails, keep the source intact</h2>
+    <h2 id="rehearsal-failure">If the rehearsal fails, keep the source intact</h2>
     <ul>
       <li><strong>Counts differ:</strong> clear search and filters in both profiles, confirm the selected backup's date, and compare the re-exported records. Do not approve a handoff with unexplained omissions.</li>
       <li><strong>Dates or ownership differ:</strong> confirm that you restored the intended final copy. Resolve conflicting edits with the responsible operator; restore is replacement, not conflict resolution.</li>
@@ -137,7 +154,7 @@
       <p><strong>Prepare before an outage:</strong> after protecting the working ledger and finishing unsaved edits, check whether the trusted app reopens without a network connection in your usual profile. Restore connectivity afterward. Keep a separately accessible backup and the contact details needed for urgent agency follow-up. One successful check is not a guarantee against later cache eviction, browser cleanup, or device failure.</p>
       <p>This is a manual continuity procedure, not an offline filing service, automatic synchronization, or a promise that all guides remain available offline. Downloaded backups are plain data; protect them even when normal online tools are unavailable.</p>
     </section>
-    <h2>5. Know what a local app cannot recover</h2>
+    <h2 id="recovery-limits">5. Know what a local app cannot recover</h2>
     <p>Browser storage belongs to a particular browser profile and website origin. Another device, profile, or app address will not automatically see the same records. Clearing site data, losing the device, or deleting the profile can remove the working ledger. PermitKeep has no hosted record database from which support can retrieve a missing backup.</p>
     <p>Calendar reminders depend on your calendar's own import and notification settings. Reimporting snapshots may create duplicates; check your calendar before relying on it. Neither a backup nor a calendar entry confirms that a permit was renewed or that a filing was accepted.</p>
     <div class="boundary"><strong>Verify legal and agency requirements separately.</strong><p>This is a data-handling workflow, not a retention schedule, filing service, or compliance guarantee. Confirm required records, dates, filing status, and retention duties with the agency and qualified advisers.</p></div>
