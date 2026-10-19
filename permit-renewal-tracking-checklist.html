@@ -10,6 +10,7 @@
   <title>Permit renewal tracking checklist for small businesses — PermitKeep</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./weekly-review.css">
 </head>
 <body>
   <a class="skip-link" href="#guide">Skip to checklist</a>
@@ -44,6 +45,18 @@
 
     <h2>6. Back up and export</h2>
     <p>A browser profile, spreadsheet, or device can fail. Keep a current backup somewhere your business controls and periodically test that it restores. Export calendar events for day-to-day visibility, but keep the full ledger as the authoritative working list.</p>
+
+    <h2 id="calendar-handoff">7. Check the calendar handoff before relying on it</h2>
+    <p>A calendar export is a snapshot, not a subscription. Changing a record in PermitKeep does not update an already imported calendar. Use the ledger for current facts and the calendar as a secondary view.</p>
+    <ol>
+      <li><strong>Check what is included.</strong> Each record with an expiration date creates two all-day events: “Start renewal” and “Expires.” Records without dates are omitted. Work-plan steps and local activity history are not included in this calendar export; review those separately.</li>
+      <li><strong>Choose a private destination.</strong> Event titles contain the record name; descriptions can contain the location, agency, and permit number. Review calendar sharing permissions before import. A local export does not make the calendar provider private or prevent invited viewers from seeing its contents.</li>
+      <li><strong>Try a separate calendar first.</strong> If your calendar supports it, create a dedicated PermitKeep calendar rather than mixing an initial import with unrelated appointments. Check one renewal-start date and one expiration date against the ledger, including month and year. All-day events do not specify an agency’s filing cutoff time.</li>
+      <li><strong>Set and test notifications yourself.</strong> The exported file contains no alarm instructions. Whether an import produces a notification depends on your calendar’s settings. Configure the alerts you need and test delivery on the device you actually use. PermitKeep does not send email or SMS reminders.</li>
+      <li><strong>Reconcile after a date changes.</strong> Back up the ledger, export a fresh file, and check how your calendar handles re-imports. Do not assume it replaces earlier events: remove or update obsolete imported entries deliberately, without deleting unrelated appointments. Deleted ledger records do not automatically disappear from a calendar.</li>
+      <li><strong>Keep missing dates on the review list.</strong> An empty calendar is not proof that nothing is due. Review undated records in the ledger, name an owner to confirm each date, and use the <a href="./weekly-permit-renewal-review.html">weekly renewal worksheet</a> to track follow-up.</li>
+    </ol>
+    <p><strong>Close the handoff:</strong> record who checked the import, when it was exported, which calendar received it, and who will reconcile changes. A calendar file is not a full backup; keep the JSON backup for restoring the working ledger. See the <a href="./permitkeep-backup-and-handoff.html">backup and handoff guide</a> before changing devices or browser profiles.</p>
 
     <div class="boundary"><strong>This checklist does not determine what your business requires.</strong><p>Permit and license rules vary and change. Confirm all requirements, dates, fees, filing status, and retention duties with the issuing agency and qualified local professionals. Never place passwords, payment-card data, tax IDs, identity documents, or other secrets in a deadline tracker.</p></div>
 
