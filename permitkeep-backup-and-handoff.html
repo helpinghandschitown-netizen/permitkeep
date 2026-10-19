@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Back up a local permit renewal tracker, rehearse a safe restore, and hand off responsibility without losing deadlines or confusing exports with sync.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <link rel="canonical" href="https://helpinghandschitown-netizen.github.io/permitkeep/permitkeep-backup-and-handoff.html">
+  <title>Back up and hand off your permit renewal tracker — PermitKeep</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#guide">Skip to guide</a>
+  <header class="site-header"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">PK</span><span>PermitKeep<small>Renewals without the spreadsheet scramble</small></span></a><nav aria-label="Main navigation"><a href="./">Open app</a><a href="./privacy.html">Privacy</a></nav></header>
+  <main id="guide" tabindex="-1"><article class="panel privacy-panel guide-copy">
+    <p class="eyebrow">From the makers of PermitKeep · Free operations guide</p>
+    <h1 class="privacy-title">A backup is only useful if the next person can restore it.</h1>
+    <p class="lede">A renewal ledger needs a recovery plan, not just a download button. Use this checklist before changing devices, clearing browser data, or handing responsibility to another operator.</p>
+    <div class="boundary"><strong>Restore replaces data. It does not merge two working ledgers.</strong><p>Download a backup of the destination browser before importing anything. Rehearse in a separate browser profile first, not over the only current copy.</p></div>
+    <h2>1. Choose the right export</h2>
+    <ul>
+      <li><strong>Download backup:</strong> the JSON recovery file contains deadline records and any stored Pro work plans and local activity history. Use this for restore.</li>
+      <li><strong>Export deadlines CSV:</strong> a readable deadline list for review or a spreadsheet. It is not a full-fidelity restore file.</li>
+      <li><strong>Export calendar:</strong> a snapshot for a calendar application. It does not establish two-way synchronization or automatically update when you edit PermitKeep.</li>
+    </ul>
+    <p>Export and restore are free. A data backup does not include the signed Pro license or activate Pro in another browser. PermitKeep Pro is not currently for sale; checkout remains disabled.</p>
+    <h2>2. Save a recovery copy outside the browser</h2>
+    <ol>
+      <li>Open the working browser profile and check that you can see the expected locations and records. Clear search and select <strong>All</strong> before checking your inventory.</li>
+      <li>In <strong>Portable by design</strong>, choose <strong>Download backup</strong>. Confirm that the JSON file actually arrived in your download folder.</li>
+      <li>Keep a dated copy in a business-controlled backup location separate from the working browser. Follow your organization's access and retention policy; do not overwrite the last known-good copy.</li>
+      <li>Record who exported it, the date, the record count, and the browser profile used. Export again after meaningful changes and before any device or browser migration.</li>
+    </ol>
+    <p>The export is plain data, not an encrypted vault. Anyone with the file can read its contents. Do not add passwords, card details, tax IDs, identity documents, or sensitive filings to the tracker. If you choose cloud storage for your backup, its privacy and access controls apply separately.</p>
+    <h2>3. Rehearse recovery without risking the original</h2>
+    <ol>
+      <li>Create a separate browser profile and open the same trusted PermitKeep app URL. Leave the original profile untouched.</li>
+      <li>If the destination already has data, download its backup first. Select <strong>Restore backup</strong> and choose the JSON file. Read any replacement confirmation before proceeding.</li>
+      <li>Compare the restored record count, locations, owners, expiration dates, lead windows, and official links against the original. Spot-check urgent and missing-date records, not only the first row.</li>
+      <li>If the source includes Pro data, keep it in the backup even when Pro is inactive in the destination. An inactive license is not evidence that work-plan data was deleted. Confirm Pro workflows separately with a valid development license where authorized.</li>
+      <li>Download a new backup from the destination and compare the records and stored work-plan/history content. Export timestamps can differ. Keep the original recovery file until the handoff is accepted.</li>
+    </ol>
+    <p>If the file is rejected or storage cannot be written, stop. Preserve the original file and working browser. Do not clear the source browser's data to troubleshoot the destination, and do not hand-edit a backup just to bypass validation.</p>
+    <h2>4. Make the handoff explicit</h2>
+    <p>Two browsers holding copies are not a shared team account. Agree which profile becomes the working ledger and who is responsible for updates. Otherwise two well-intentioned operators can create conflicting versions.</p>
+    <ul>
+      <li><strong>Outgoing owner:</strong> export a final backup and identify urgent renewals, missing information, agency contacts, and unfinished work.</li>
+      <li><strong>Incoming owner:</strong> complete the restore check, verify priority dates with the issuing agencies, and accept responsibility for the next review.</li>
+      <li><strong>Both:</strong> record the handoff date and backup filename through an approved business channel. Retain prior copies according to policy; avoid casual email attachments containing private operational details.</li>
+    </ul>
+    <h2>5. Know what a local app cannot recover</h2>
+    <p>Browser storage belongs to a particular browser profile and website origin. Another device, profile, or app address will not automatically see the same records. Clearing site data, losing the device, or deleting the profile can remove the working ledger. PermitKeep has no hosted record database from which support can retrieve a missing backup.</p>
+    <p>Calendar reminders depend on your calendar's own import and notification settings. Reimporting snapshots may create duplicates; check your calendar before relying on it. Neither a backup nor a calendar entry confirms that a permit was renewed or that a filing was accepted.</p>
+    <div class="boundary"><strong>Verify legal and agency requirements separately.</strong><p>This is a data-handling workflow, not a retention schedule, filing service, or compliance guarantee. Confirm required records, dates, filing status, and retention duties with the agency and qualified advisers.</p></div>
+    <h2>Start with a free local deadline ledger</h2>
+    <p>PermitKeep tracks dates and lead windows you enter, with local backup, CSV, and calendar exports. No account is required. It does not discover requirements, monitor agencies, send email reminders, or provide automatic cloud backup.</p>
+    <p><a class="button button-primary" href="./#privacy">Open PermitKeep's backup tools</a> <a class="button button-quiet" href="./privacy.html">Read the privacy boundary</a></p>
+    <h2>Related guides</h2>
+    <ul><li><a href="./permit-renewal-tracking-checklist.html">Build a permit renewal checklist</a></li><li><a href="./multi-location-license-renewal-process.html">Assign a multi-location renewal process</a></li></ul>
+  </article></main>
+  <footer><span>PermitKeep</span><span>Original maker guide · No affiliate links · No compliance guarantee</span></footer>
+</body>
+</html>
