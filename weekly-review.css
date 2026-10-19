@@ -1,0 +1,18 @@
+.guide-copy { overflow-wrap: anywhere; min-width: 0; }
+.review-sheet { border: 2px solid var(--line, #888); border-radius: 12px; padding: 1.25rem; margin-block: 2rem; }
+.review-sheet dt { font-weight: 700; margin-top: 1rem; }
+.review-sheet dd { margin: .35rem 0 0; overflow-wrap: anywhere; }
+@media print {
+  @page { margin: 16mm; }
+  body > main { display: block !important; }
+  body { background: white !important; color: black !important; font-size: 11pt; }
+  .site-header, .skip-link, .screen-only, footer { display: none !important; }
+  main, .panel, .guide-copy { max-width: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; }
+  .review-sheet { break-before: page; break-after: page; border: 1px solid black; padding: 10mm; }
+  .review-sheet { font-size: 9pt; }
+  .review-sheet dt { margin-top: 2mm; }
+  .review-sheet p { margin-block: 2mm; }
+  .review-sheet dt, h2, h3 { break-after: avoid; }
+  .review-sheet dd { margin-bottom: 2mm; }
+  a { color: black !important; }
+}
