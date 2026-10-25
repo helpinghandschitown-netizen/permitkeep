@@ -234,7 +234,8 @@ export function buildPortfolioReview(records, steps, today = dateString(new Date
 }
 
 function icsText(value) {
-  return clean(value, 800).replaceAll('\\', '\\\\').replaceAll('\n', '\\n').replaceAll(',', '\\,').replaceAll(';', '\\;');
+  // Validated fields can exceed 800 characters when combined; fold, do not truncate.
+  return String(value ?? '').replace(/\r\n?/g, '\n').trim().replaceAll('\\', '\\\\').replaceAll('\n', '\\n').replaceAll(',', '\\,').replaceAll(';', '\\;');
 }
 
 function icsDate(value) { return value.replaceAll('-', ''); }
