@@ -1,4 +1,4 @@
-const CACHE = 'permitkeep-v6';
+const CACHE = 'permitkeep-v7';
 const ASSETS = ['./', './index.html', './styles.css', './icon.svg', './manifest.webmanifest', './src/app.mjs', './src/core.mjs', './src/store.mjs', './src/crypto.mjs', './src/license.mjs', './privacy.html', './terms.html', './permit-renewal-tracking-checklist.html', './multi-location-license-renewal-process.html', './restaurant-permit-renewal-calendar.html'];
 
 self.addEventListener('install', (event) => {

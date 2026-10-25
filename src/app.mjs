@@ -69,7 +69,7 @@ function activity(action, entityId, recordId, summary) {
   return createActivityEntry({ action, entityId, recordId, summary });
 }
 
-function persistState(nextRecords, nextPro, message) {
+function persistState(nextRecords, nextPro, message, afterSave) {
   const previousRecords = localStorage.getItem(STORAGE_KEY);
   const previousPro = localStorage.getItem(PRO_STORAGE_KEY);
   try {
@@ -84,8 +84,21 @@ function persistState(nextRecords, nextPro, message) {
   }
   records = nextRecords;
   proData = nextPro;
+  afterSave?.();
   render();
   if (message) announce(message);
+}
+
+// A saved record may no longer match the active search/filter. Keep keyboard
+// users in the dashboard without silently changing their chosen view.
+function focusRecordAction(id) {
+  const card = [...document.querySelectorAll('.record-card')].find(item => item.dataset.id === id);
+  (card?.querySelector('[data-action="edit"]') || document.querySelector('#search'))?.focus();
+}
+
+function focusStepAction(id, action = 'edit') {
+  const card = [...document.querySelectorAll('.step-card')].find(item => item.dataset.stepId === id);
+  (card?.querySelector(`[data-step-action="${action}"]`) || document.querySelector('#step-form [name="title"]'))?.focus();
 }
 
 function summary() {
@@ -232,22 +245,51 @@ function bind() {
       const nextRecords = upsertRecord(records, input);
       const changed = nextRecords.find((record) => record.id === (input.id || nextRecords.at(-1).id));
       const nextPro = { ...proData, activity: [...proData.activity, activity(wasEditing ? 'record.updated' : 'record.created', changed.id, changed.id, `${wasEditing ? 'Updated' : 'Created'} ${changed.name}`)] };
-      editingId = null;
-      persistState(nextRecords, nextPro, wasEditing ? 'Deadline updated.' : 'Deadline added.');
-      document.querySelector('#deadlines')?.scrollIntoView({ behavior: 'smooth' });
+      persistState(nextRecords, nextPro, wasEditing ? 'Deadline updated.' : 'Deadline added.', () => { editingId = null; });
+      focusRecordAction(changed.id);
     } catch (error) { announce(error.message, 'error'); }
   });
   document.querySelector('#record-form')?.addEventListener('input', updatePreview);
-  document.querySelector('#cancel-edit')?.addEventListener('click', () => { editingId = null; render(); });
-  document.querySelectorAll('[data-filter]').forEach((button) => button.addEventListener('click', () => { filter = button.dataset.filter; render(); document.querySelector('#deadlines')?.scrollIntoView({ behavior: 'smooth' }); }));
-  document.querySelector('#search')?.addEventListener('input', (event) => { query = event.target.value; render(); document.querySelector('#search')?.focus(); });
+  document.querySelector('#cancel-edit')?.addEventListener('click', () => { const id = editingId; editingId = null; render(); focusRecordAction(id); });
+  document.querySelectorAll('[data-filter]').forEach((button, index) => button.addEventListener('click', () => {
+    // Both summary and toolbar contain the same filter values. Retain the exact
+    // initiating control, not the first matching value, after replacing the DOM.
+    const restoreFocus = document.activeElement === button;
+    filter = button.dataset.filter;
+    render();
+    if (restoreFocus) document.querySelectorAll('[data-filter]')[index]?.focus();
+    else document.querySelector('#deadlines')?.scrollIntoView({ behavior: 'smooth' });
+  }));
+  const searchInput = document.querySelector('#search');
+  searchInput?.addEventListener('compositionend', (event) => {
+    // Defer until Firefox finishes its native editor; replacing it during
+    // compositionend can clear the new input. A later input event may render first.
+    const target = event.target;
+    setTimeout(() => { if (target.isConnected) updateSearch({ target }); }, 0);
+  });
+  searchInput?.addEventListener('input', updateSearch);
+  function updateSearch(event) {
+    // Keep the native editor intact until composition commits or cancels.
+    if (event.isComposing) return;
+    const { value, selectionStart, selectionEnd, selectionDirection } = event.target;
+    query = value;
+    render();
+    const input = document.querySelector('#search');
+    input?.focus();
+    // Preserve the post-edit selection across the replacement input.
+    if (selectionStart !== null && selectionEnd !== null) input?.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+  }
   document.querySelectorAll('.record-card').forEach((card) => card.addEventListener('click', (event) => {
     const actionName = event.target.closest('button')?.dataset.action;
-    if (actionName === 'edit') { editingId = card.dataset.id; render(); document.querySelector('#editor')?.scrollIntoView({ behavior: 'smooth' }); }
+    if (actionName === 'edit') { editingId = card.dataset.id; render(); document.querySelector('#record-form [name="name"]')?.focus(); }
     if (actionName === 'delete' && confirm('Delete this local deadline and its work-plan steps? This cannot be undone unless it is in a backup.')) {
       const removed = records.find((record) => record.id === card.dataset.id);
       const nextPro = { steps: proData.steps.filter((step) => step.recordId !== card.dataset.id), activity: [...proData.activity, activity('record.deleted', card.dataset.id, card.dataset.id, `Deleted ${removed?.name || 'record'} and its work plan`)] };
-      try { persistState(removeRecord(records, card.dataset.id), nextPro, 'Deadline and linked work-plan steps deleted.'); } catch (error) { announce(error.message, 'error'); }
+      const neighborId = [...document.querySelectorAll('.record-card')].find(item => item !== card)?.dataset.id;
+      try {
+        persistState(removeRecord(records, card.dataset.id), nextPro, 'Deadline and linked work-plan steps deleted.');
+        focusRecordAction(neighborId);
+      } catch (error) { announce(error.message, 'error'); }
     }
   }));
   document.querySelector('#backup-export')?.addEventListener('click', () => download(`permitkeep-backup-${today()}.json`, exportBackup(records, proData), 'application/json'));
@@ -261,6 +303,7 @@ function bind() {
       const incoming = importFullBackup(await file.text());
       if ((records.length || proData.steps.length || proData.activity.length) && !confirm(`Replace current local data with ${incoming.records.length} record(s), ${incoming.pro.steps.length} step(s), and ${incoming.pro.activity.length} history entries?`)) return;
       persistState(incoming.records, incoming.pro, `${incoming.records.length} record(s) and associated local operations data restored.`);
+      document.querySelector('#backup-import')?.focus();
     } catch (error) { announce(error.message, 'error'); }
     finally { event.target.value = ''; }
   });
@@ -269,7 +312,17 @@ function bind() {
     const code = new FormData(event.currentTarget).get('code');
     const verified = await verifyLicenseCode(code);
     if (!verified) { announce('That license is malformed, altered, or for another product.', 'error'); return; }
-    try { saveLicense(code); license = verified; render(); announce('PermitKeep Pro v1 activated in this browser.'); } catch (error) { announce(`License could not be saved: ${error.message}`, 'error'); }
+    try {
+      saveLicense(code);
+      license = verified;
+      render();
+      // The activation form is removed by render; move focus into the unlocked
+      // workspace rather than leaving keyboard users at the document body.
+      const heading = document.querySelector('#pro-title');
+      heading?.setAttribute('tabindex', '-1');
+      heading?.focus();
+      announce('PermitKeep Pro v1 activated in this browser.');
+    } catch (error) { announce(`License could not be saved: ${error.message}`, 'error'); }
   });
   document.querySelector('#step-form')?.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -280,28 +333,32 @@ function bind() {
       const nextSteps = upsertWorkStep(proData.steps, input);
       const changed = nextSteps.find((step) => step.id === (input.id || nextSteps.at(-1).id));
       const nextPro = { steps: nextSteps, activity: [...proData.activity, activity(wasEditing ? 'step.updated' : 'step.created', changed.id, changed.recordId, `${wasEditing ? 'Updated' : 'Added'} work step “${changed.title}” for ${recordName(changed.recordId)}`)] };
-      editingStepId = null;
-      persistState(records, nextPro, wasEditing ? 'Work step updated.' : 'Work step added.');
-      document.querySelector('#pro')?.scrollIntoView({ behavior: 'smooth' });
+      persistState(records, nextPro, wasEditing ? 'Work step updated.' : 'Work step added.', () => { editingStepId = null; });
+      focusStepAction(changed.id);
     } catch (error) { announce(error.message, 'error'); }
   });
-  document.querySelector('#cancel-step-edit')?.addEventListener('click', () => { editingStepId = null; render(); });
+  document.querySelector('#cancel-step-edit')?.addEventListener('click', () => { const id = editingStepId; editingStepId = null; render(); focusStepAction(id); });
   document.querySelectorAll('.step-card').forEach((card) => card.addEventListener('click', (event) => {
     const actionName = event.target.closest('button')?.dataset.stepAction;
     const step = proData.steps.find((item) => item.id === card.dataset.stepId);
     if (!step || !actionName) return;
-    if (actionName === 'edit') { editingStepId = step.id; render(); document.querySelector('#step-editor-title')?.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (actionName === 'edit') { editingStepId = step.id; render(); document.querySelector('#step-form [name="title"]')?.focus(); return; }
     if (actionName === 'delete' && !confirm(`Delete the work step “${step.title}”?`)) return;
     try {
       if (actionName === 'toggle') {
         const nextSteps = upsertWorkStep(proData.steps, { ...step, completed: !step.completed });
         const verb = step.completed ? 'Reopened' : 'Completed';
         persistState(records, { steps: nextSteps, activity: [...proData.activity, activity(step.completed ? 'step.reopened' : 'step.completed', step.id, step.recordId, `${verb} work step “${step.title}” for ${recordName(step.recordId)}`)] }, `${verb} work step.`);
+        focusStepAction(step.id, 'toggle');
       }
-      if (actionName === 'delete') persistState(records, { steps: removeWorkStep(proData.steps, step.id), activity: [...proData.activity, activity('step.deleted', step.id, step.recordId, `Deleted work step “${step.title}” for ${recordName(step.recordId)}`)] }, 'Work step deleted.');
+      if (actionName === 'delete') {
+        const neighborId = [...document.querySelectorAll('.step-card')].find(item => item !== card)?.dataset.stepId;
+        persistState(records, { steps: removeWorkStep(proData.steps, step.id), activity: [...proData.activity, activity('step.deleted', step.id, step.recordId, `Deleted work step “${step.title}” for ${recordName(step.recordId)}`)] }, 'Work step deleted.');
+        focusStepAction(neighborId);
+      }
     } catch (error) { announce(error.message, 'error'); }
   }));
-  document.querySelectorAll('[data-report-group]').forEach((button) => button.addEventListener('click', () => { reportGrouping = button.dataset.reportGroup; render(); document.querySelector('#portfolio-report')?.scrollIntoView({ behavior: 'smooth' }); }));
+  document.querySelectorAll('[data-report-group]').forEach((button) => button.addEventListener('click', () => { reportGrouping = button.dataset.reportGroup; render(); document.querySelector(`[data-report-group="${reportGrouping}"]`)?.focus(); }));
   document.querySelector('#print-report')?.addEventListener('click', () => window.print());
 }
 

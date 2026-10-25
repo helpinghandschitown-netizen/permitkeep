@@ -21,7 +21,8 @@ const chrome = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const port = 9348;
 const appPort = 4188;
 const qa = path.resolve('.qa');
-const profile = path.join(qa, 'chrome-profile');
+// Keep Chromium's nested CacheStorage paths below Windows path limits.
+const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'pk-e2e-'));
 const site = path.join(qa, 'release-site');
 const downloads = path.join(qa, 'downloads');
 fs.rmSync(qa, { recursive: true, force: true });
@@ -98,6 +99,15 @@ try {
   const { targetId } = await send('Target.createTarget', { url: `http://127.0.0.1:${appPort}/` });
   const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
   await send('Page.enable', {}, sessionId);
+  // Fixed fixture clock: deadline assertions must not expire with wall time.
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: `{
+    const RealDate = Date;
+    const fixed = new RealDate('2026-09-03T12:00:00Z').getTime();
+    globalThis.Date = class extends RealDate {
+      constructor(...args) { super(...(args.length ? args : [fixed])); }
+      static now() { return fixed; }
+    };
+  }` }, sessionId);
   await send('Runtime.enable', {}, sessionId);
   await send('Network.enable', {}, sessionId);
   await send('Log.enable', {}, sessionId);
@@ -298,7 +308,9 @@ try {
   const proMobileShot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }, sessionId);
   fs.writeFileSync('.qa/permitkeep-pro-mobile.png', Buffer.from(proMobileShot.data, 'base64'));
 
-  await evaluate(`navigator.serviceWorker.getRegistration().then((registration) => registration || navigator.serviceWorker.register('./sw.js')).then((registration) => registration.update())`);
+  // An installing registration has no active script yet; update() can reject
+  // with "Unknown: Not found". Wait for activation before testing updates.
+  await evaluate(`navigator.serviceWorker.register('./sw.js').then(() => navigator.serviceWorker.ready).then((registration) => registration.update())`);
   await waitFor(`navigator.serviceWorker.ready.then(() => caches.keys()).then((keys) => keys.includes('${baseCache}'))`, 'initial service worker activation');
   await evaluate(`caches.open('sibling-app-v1').then((cache) => cache.put('./sibling-probe', new Response('keep me')))`);
   await stopServer();
@@ -328,6 +340,9 @@ try {
   console.log(JSON.stringify({ passed: true, baseline, corruptRecovery, privacyPage, guidePages, flow, freeBoundary, proFlow, backupRestore: { malformed, restored, cancelled, downloadedRecords: downloadedBackup.records.length, downloadedSteps: downloadedBackup.pro.steps.length, downloadedActivity: downloadedBackup.pro.activity.length }, quotaFailure, accessibility: { ...accessibility, unnamedAxNodes }, reducedMotion, mobile, offline, upgrade, externalNetworkOrigins: [...externalNetworkOrigins], securityMessages, consoleErrors, artifacts: ['.qa/permitkeep-desktop.png', '.qa/permitkeep-mobile.png', '.qa/permitkeep-pro-mobile.png'] }, null, 2));
   ws.close();
 } finally {
+  const browserExited = browser.exitCode === null ? once(browser, 'exit') : Promise.resolve();
   browser.kill();
+  await Promise.race([browserExited, pause(2500)]);
   await stopServer();
+  fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
 }
