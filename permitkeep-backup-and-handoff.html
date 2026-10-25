@@ -52,6 +52,7 @@
         <li><a href="#browser-migration">Change browser or app address</a></li>
         <li><a href="#failed-save-recovery">Preserve a draft after a failed save</a></li>
         <li><a href="#offline-outage">Keep working through an internet outage</a></li>
+        <li><a href="#lost-device">Recover after a lost or unavailable device</a></li>
         <li><a href="#recovery-limits">Understand recovery limits</a></li>
       </ul>
     </nav>
@@ -172,6 +173,19 @@
       </ol>
       <p><strong>Prepare before an outage:</strong> after protecting the working ledger and finishing unsaved edits, check whether the trusted app reopens without a network connection in your usual profile. Restore connectivity afterward. Keep a separately accessible backup and the contact details needed for urgent agency follow-up. One successful check is not a guarantee against later cache eviction, browser cleanup, or device failure.</p>
       <p>This is a manual continuity procedure, not an offline filing service, automatic synchronization, or a promise that all guides remain available offline. Downloaded backups are plain data; protect them even when normal online tools are unavailable.</p>
+    </section>
+    <section id="lost-device" aria-labelledby="lost-device-title">
+      <h2 id="lost-device-title">The working device is lost or unavailable. Recover from evidence, not memory.</h2>
+      <p>A missing device creates two separate problems: recovering the renewal ledger and protecting any information left on that device. Restoring a backup addresses only the first. PermitKeep cannot locate a device, remotely erase browser storage, or retrieve a server copy of your records.</p>
+      <ol>
+        <li><strong>Start your organization's device-loss procedure.</strong> Notify the responsible person and use your approved IT or device-management process. Do not assume a browser password, a Pro license, or restoring elsewhere makes the missing copy unreadable. Browser storage and downloaded exports are not encrypted by PermitKeep. Consider which operational information was actually present; avoid publishing the backup or device details in a support issue.</li>
+        <li><strong>Locate a separately stored recovery file.</strong> Check your approved backup location for the most recent known-good JSON file and its recorded source. Preserve that original unchanged. A CSV or calendar snapshot can help reconstruct individual facts, but neither is a complete restore file. If the only backup was on the missing device, a new installation cannot recover it.</li>
+        <li><strong>Restore into a trusted replacement profile.</strong> Verify the app address using an existing trusted source. Back up any destination data first, then follow the separate-profile restore rehearsal above. Compare the restored records, urgent dates, owners, and stored work-plan/history content before using the replacement as the working ledger. Keep license activation separate from data recovery.</li>
+        <li><strong>Account for the gap since the backup.</strong> List changes that may have happened after the export: new permits, revised dates, reassigned owners, and completed or unfinished steps. Reconstruct them from approved business records and the responsible operators. Check filing and renewal facts with the issuing agencies; a local history entry or an old calendar event is not proof of acceptance. Mark unresolved facts for follow-up instead of inventing missing values.</li>
+        <li><strong>Accept one replacement working copy.</strong> Record the backup used, the unresolved gap, the responsible operator, and the next review date. Reopen the app, verify persistence, and export a new dated backup to approved storage. If the original device returns, preserve its copy and compare it separately before accepting any later changes. Do not import it over the replacement merely because its export date is newer.</li>
+      </ol>
+      <p><strong>Recovery checkpoint:</strong> backup filename and date; missing period; facts verified; unresolved questions and owners; replacement profile; next review. Keep this note private. If no usable JSON backup exists, rebuild a new ledger from your business records, retain any available snapshots, and explicitly mark information that has not been verified.</p>
+      <p>Device security, legal notification duties, and record-retention decisions require your organization's process and qualified advice. This guide is not an incident-response service, a remote-wipe feature, or a guarantee that lost records can be recovered.</p>
     </section>
     <h2 id="recovery-limits">5. Know what a local app cannot recover</h2>
     <p>Browser storage belongs to a particular browser profile and website origin. Another device, profile, or app address will not automatically see the same records. Clearing site data, losing the device, or deleting the profile can remove the working ledger. PermitKeep has no hosted record database from which support can retrieve a missing backup.</p>
