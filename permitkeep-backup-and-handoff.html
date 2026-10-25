@@ -19,6 +19,25 @@
     <h1 class="privacy-title">A backup is only useful if the next person can restore it.</h1>
     <p class="lede">A renewal ledger needs a recovery plan, not just a download button. Use this checklist before changing devices, clearing browser data, or handing responsibility to another operator.</p>
     <div class="boundary"><strong>Restore replaces data. It does not merge two working ledgers.</strong><p>Download a backup of the destination browser before importing anything. Rehearse in a separate browser profile first, not over the only current copy.</p></div>
+    <section id="recovery-triage" aria-labelledby="recovery-triage-title">
+      <h2 id="recovery-triage-title">Start with the symptom, not a reset</h2>
+      <p>Keep the original browser profile and last known-good backup intact. Choose the situation below before changing anything. If a renewal is urgent, contact the responsible operator or agency through your normal business process while you recover the tracker.</p>
+      <dl>
+        <dt>The dashboard looks empty</dt>
+        <dd>Clear search and filters, then confirm the trusted app address and original browser profile. Do not import or reset yet: you may be looking at a different copy. <a href="#browser-migration">Find the working source before migrating.</a></dd>
+        <dt>A save failed while my edit is still visible</dt>
+        <dd>Keep the window open and copy the unsaved draft into an approved private record before reloading. A downloaded backup may not include that draft. <a href="#failed-save-recovery">Protect the draft and recover the saved ledger.</a></dd>
+        <dt>A backup was rejected or the restored records differ</dt>
+        <dd>Keep the original file unchanged and leave the source profile intact. Confirm the intended backup and compare records in a separate rehearsal profile; do not edit JSON to bypass validation. <a href="#rehearsal-failure">Check the failed rehearsal.</a></dd>
+        <dt>Two operators have different versions</dt>
+        <dd>Preserve both backups and pause ledger edits while the responsible owner compares the differences. A newer filename is not evidence that a copy is complete. <a href="#conflicting-copies">Reconcile the copies without automatic merging.</a></dd>
+        <dt>The app will not open during an internet outage</dt>
+        <dd>Do not clear site data or uninstall the app. Keep a private outage note and use existing business records for urgent work; a new profile cannot fetch its first app copy offline. <a href="#offline-outage">Follow the continuity procedure.</a></dd>
+        <dt>The records restored, but Pro controls are unavailable</dt>
+        <dd>Data recovery and license activation are separate. Keep the backup and compare stored work-plan and history data in a re-export; do not delete it to change the interface. <a href="#rehearse-recovery">Verify data preservation separately.</a></dd>
+      </dl>
+      <p><strong>When asking for help:</strong> describe the symptom, browser, whether the profile or app address changed, and the visible error wording with private details removed. Do not attach a full backup, license code, payment-return URL, or unredacted screenshot to a public issue. Support cannot retrieve a hosted copy of your ledger.</p>
+    </section>
     <nav class="screen-only" aria-label="Recovery guide sections">
       <h2>Find the recovery step you need</h2>
       <ul>
